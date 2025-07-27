@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kamera Upload Dropbox</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>OCS NFI Upload Cam</h1>
+
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+
+   
+
+    <div class="btn-group">
+      <button id="capture">📸 Ambil Foto</button>
+      <button id="upload">☁️ Upload</button>
+    </div>
+
+    <img id="preview" alt="Preview Foto" />
+    <p id="status" class="status-text"></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
