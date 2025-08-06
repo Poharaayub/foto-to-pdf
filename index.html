@@ -3,27 +3,159 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kamera Upload Dropbox</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Foto ke PDF (Maks. 500)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f1f3f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      background: #4A90E2;
+      color: white;
+      padding: 1.2rem;
+      margin: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    input[type="file"] {
+      margin: 1rem;
+      padding: 10px;
+      border: 2px dashed #aaa;
+      border-radius: 10px;
+      background: white;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+    }
+    #preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+      padding: 1rem;
+      width: 95%;
+      max-width: 1100px;
+    }
+    .img-box {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      aspect-ratio: 3/4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-box:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    button {
+      padding: 12px 28px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background 0.3s, transform 0.2s;
+    }
+    button:hover {
+      background: #388e3c;
+      transform: scale(1.03);
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.2rem;
+      }
+      #preview {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>OCS NFI Upload Cam</h1>
 
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" style="display: none;"></canvas>
+  <h1>📸 Foto ke PDF (Maks. 500 Foto)</h1>
+  <input type="file" id="file-input" accept="image/*" multiple />
+  <div id="preview"></div>
+  <button onclick="downloadPDF()">⬇️ Unduh PDF</button>
 
-   
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const preview = document.getElementById('preview');
+    let images = [];
 
-    <div class="btn-group">
-      <button id="capture">📸 Ambil Foto</button>
-      <button id="upload">☁️ Upload</button>
-    </div>
+    fileInput.addEventListener('change', (e) => {
+      images = [];
+      preview.innerHTML = "";
+      const files = Array.from(e.target.files).slice(0, 500);
 
-    <img id="preview" alt="Preview Foto" />
-    <p id="status" class="status-text"></p>
-  </div>
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          const div = document.createElement('div');
+          div.className = 'img-box';
+          div.appendChild(img);
+          preview.appendChild(div);
+          images.push(event.target.result);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
 
-  <script src="script.js"></script>
+    async function downloadPDF() {
+      if (images.length === 0) {
+        alert('Silakan pilih foto terlebih dahulu.');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      for (let i = 0; i < images.length; i++) {
+        const img = new Image();
+        img.src = images[i];
+        await new Promise((res) => {
+          img.onload = () => {
+            const imgWidth = 210;
+            const ratio = img.height / img.width;
+            const imgHeight = imgWidth * ratio;
+            if (i > 0) pdf.addPage();
+            pdf.addImage(img, 'JPEG', 0, 0, imgWidth, imgHeight);
+            res();
+          };
+        });
+      }
+
+      pdf.save('foto_ke_pdf.pdf');
+    }
+  </script>
 </body>
 </html>
